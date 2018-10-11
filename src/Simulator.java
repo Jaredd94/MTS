@@ -1,11 +1,12 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Simulator {
 
-	private Bus[] buses;
-	private Passenger[] passengers;
-	private Route[] routes;
-	private Stop[] stops;
+	private ArrayList<Bus> buses;
+	private ArrayList<Passenger> passengers;
+	private ArrayList<Route> routes;
+	private ArrayList<Stop> stops;
 	
 	enum Event {
 		move_bus;
@@ -33,31 +34,31 @@ public class Simulator {
 		}
 	}
 	
-	public void handle_add_bus() {
-		
+	public void addBus() {
+		// add_bus id name route_id route_index passenger_count max_capacity speed
 	}
 	
-	public void handle_add_depot() {
-		
+	public void addDepot() {
+		// add_depot id name latitude longitude
 	}
 	
-	public void handle_add_event() {
-		
+	public void addEvent() {
+		// add_event time type id
 	}
 	
-	public void handle_add_route() {
-		
+	public void addRoute() {
+		// add_route id number name
 	}
 	
-	public void handle_add_stop() {
-		
+	public void addStop() {
+		// add_stop id name rider_count latitude longitude
 	}
 	
-	public void handle_extend_route() {
-		
+	public void extendRoute() {
+		// extend_route route_id stop_id
 	}
 	
-	public void invoke_event() {
+	public void invokeEvent() {
 		
 	}
 }
