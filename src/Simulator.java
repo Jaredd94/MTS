@@ -41,12 +41,12 @@ public class Simulator {
 		this.depots = new ArrayList<Depot>();
 		
 		for (String instruction : instructions) {
-			parser(instruction);
+			parserInstruction(instruction);
 		}
 	}
 	
 	// Parse command and handle with proper call
-	public void parser(String line) {
+	public void parserInstruction(String line) {
 		String[] cmdArgs = line.split(",");
 		
 		String action = cmdArgs[0];
