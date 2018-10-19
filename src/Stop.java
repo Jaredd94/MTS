@@ -4,11 +4,11 @@ public class Stop {
 	private Integer id;
 	private String name;
 	private Integer riders;
-	private double latitude;
-	private double longitude;
-	private boolean depot;
+	private Double latitude;
+	private Double longitude;
+	private Boolean depot;
 	
-	public Stop(Integer id, String name, Integer riders, double latitude, double longitude) {
+	public Stop(Integer id, String name, Integer riders, Double latitude, Double longitude) {
 		this.id = id;
 		this.name = name;
 		this.riders = riders;
@@ -40,7 +40,7 @@ public class Stop {
 		this.riders = riders;
 	}
 
-	public double getLatitude() {
+	public Double getLatitude() {
 		return latitude;
 	}
 
@@ -48,7 +48,7 @@ public class Stop {
 		this.latitude = latitude;
 	}
 
-	public double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 
@@ -56,7 +56,7 @@ public class Stop {
 		this.longitude = longitude;
 	}
 	
-	public boolean isDepot() {
+	public Boolean isDepot() {
 		return depot;
 	}
 }

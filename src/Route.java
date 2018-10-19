@@ -7,10 +7,15 @@ public class Route {
 	private String name;
 	private ArrayList<Stop> stops;
 
+	public Route() {
+		
+	}
+	
 	public Route(Integer id, Integer number, String name) {
 		this.id = id;
 		this.number = number;
 		this.name = name;
+		this.stops = new ArrayList<Stop>();
 	}
 
 	public Integer getId() {
