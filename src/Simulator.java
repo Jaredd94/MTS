@@ -177,27 +177,30 @@ public class Simulator {
 			System.out.printf("Unable to find bus with id %d", busId);
 			return;
 		}
-		bus.moveBus();
+		bus.moveBus(event.getTime());
 		Event newEvent = new Event(bus.getArrivalTime(), event.getType(), event.getArgs());
 		events.add(newEvent);
+		System.out.println("Bus ID: "+ busId + " CurrTime: " + event.getTime() + " NextEvent Time: "+ newEvent.getTime());
 	}
 	
-	public void processEvents(Integer timeLimit) {
+	public void processEvents(Integer loopLimit) {
 		Debug.print("Starting event loop");
-		while(simTime < timeLimit && !events.isEmpty()) {
+		int iterations = 0;
+		while(iterations < loopLimit || events.isEmpty()) {
 			
 			// sort the event queue
 			events.sort(new SortEvents());
 			
 			// Choose new event
-			Event event = events.remove(0);
-			String type = event.getType().toString();
-			int time = event.getTime();
+			ArrayList<Event> eventsAtTime = getEventsByTime(simTime);
+			for (Event event : eventsAtTime) {
+				String type = event.getType().toString();
+				int time = event.getTime();
+				// Execute event
+				invokeEvent(event);
+				iterations++;
+			}
 			
-			// Execute event
-			System.out.printf("Event %s at time %d", type, time).println();
-			invokeEvent(event);
-						
 			// increment simTime
 			simTime++;
 		}
@@ -331,5 +334,15 @@ public class Simulator {
 		
 		System.out.printf("No buses found with id %d", id).println();
 		return null;
+	}
+	
+	public ArrayList<Event> getEventsByTime(int time) {
+		ArrayList<Event> temp = new ArrayList<Event>();
+		for (Event event : events) {
+			if (event.getTime() == time) {
+				temp.add(event);
+			}
+		}
+		return temp;
 	}
 }

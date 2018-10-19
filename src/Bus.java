@@ -23,6 +23,16 @@ public class Bus {
 		this.fuelLevel = fuelLevel;
 		this.fuelCapacity = fuelCapacity;
 		this.speed = speed;
+		
+		double distanceToNextStop = 0;
+		if (!route.stopList().isEmpty() && routeIndex < route.stopList().size()) {
+			Stop currStop = getCurrStop();
+			Stop nextStop = getNextStop();
+			distanceToNextStop = getDistance(currStop, nextStop);
+			this.arrivalTime = calculateTravelTime(distanceToNextStop);
+		} else {
+			this.arrivalTime = 0;
+		}
 	}
 
 	
@@ -113,14 +123,21 @@ public class Bus {
 	public int getArrivalTime() {
 		return this.arrivalTime;
 	}
+	
+	public Stop getCurrStop() {
+		return this.route.stopList().get(this.routeIndex);
+	}
 
-
+	public Stop getNextStop() {
+		return this.route.stopList().get((routeIndex+1)%route.stopList().size());
+	}
+	
 	public Boolean isFull() {
 		return (passengerCount == maxCapacity);
 	}
 	
 	public int calculateTravelTime(Double distance) {
-		return 1 + (distance.intValue() * Bus.MINUTES / this.getSpeed());
+		return 1 + ((distance.intValue() * Bus.MINUTES) / this.getSpeed());
 	}
 	
 	public double getDistance(Stop curr, Stop dst) {
@@ -129,7 +146,7 @@ public class Bus {
 		double dstX = dst.getLatitude();
 		double dstY = dst.getLongitude();
 		double distance = Bus.CONVERSION_FACTOR * Math.sqrt(Math.pow((currX - dstX),2) + Math.pow((currY - dstY),2));
-		System.out.printf("Distance Calculated: %.2f Miles", distance);
+		Debug.print("Distance Calculated: " + distance + "Miles");
 		return distance;
 	}
 	
@@ -144,7 +161,13 @@ public class Bus {
 	}
 	
 	// TODO
-	public void moveBus() {
+	public void moveBus(int currTime) {
 		Debug.print("Departing current stop!");
+		this.routeIndex = (this.routeIndex + 1) % this.route.stopList().size();
+		Stop currStop = getCurrStop();
+		Stop nextStop = getNextStop();
+		double distanceToNextStop = getDistance(currStop, nextStop);
+		int timeToNextStop = calculateTravelTime(distanceToNextStop);
+		this.arrivalTime = currTime + timeToNextStop;
 	}
 }
