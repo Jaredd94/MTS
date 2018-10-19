@@ -8,6 +8,8 @@ public class Parser {
 	@SuppressWarnings({ "resource"})
 	public static void main (String[] args) throws IOException {
 		
+		Debug.on = false;
+		
 		Debug.print("Start Simulator!");
 		File inputFile = new File(args[0]);
 		Debug.print("Found File: " + inputFile.getAbsolutePath());
