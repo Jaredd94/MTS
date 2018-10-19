@@ -4,22 +4,22 @@ public class Event {
 		move_bus;
 	}
 	
-	Integer id;
 	EventType type;
-	Integer time;
+	int time;
+	String[] args;
 
-	public Event(EventType type, Integer time, Integer id) {
-		this.id = id;
-		this.type = type;
+	public Event(int time, EventType type, String[] args) {
 		this.time = time;
+		this.type = type;
+		this.args = args;
 	}
 	
-	public Integer getId() {
-		return id;
+	public String[] getArgs() {
+		return args;
 	}
 
-	public void setId(Integer id) {
-		this.id = id;
+	public void setArgs(String[] args) {
+		this.args = args;
 	}
 
 	public EventType getType() {
@@ -30,7 +30,7 @@ public class Event {
 		this.type = type;
 	}
 
-	public Integer getTime() {
+	public int getTime() {
 		return time;
 	}
 

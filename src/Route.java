@@ -53,4 +53,19 @@ public class Route {
 	public void addStop (Stop stop) {		
 		stops.add(stop);
 	}
+	
+	public Stop getStopById(Integer id) {
+		if (stops.isEmpty()) {
+			System.out.println("No stops found in route.  You need to add stops to this route!");
+			return null;
+		}
+		for (Stop stop: stops) {
+			if (id.equals(stop.getId())) {
+				return stop;
+			}
+		}
+		
+		System.out.printf("Unable to find any stops with id %d",id);
+		return null;
+	}
 }

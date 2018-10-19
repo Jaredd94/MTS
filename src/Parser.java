@@ -24,12 +24,8 @@ public class Parser {
 		}
 		
 		Simulator sim = new Simulator(instructions);
-		sim.getEvents().add(new Event(Event.EventType.move_bus,3,1));
-		sim.getEvents().add(new Event(Event.EventType.move_bus,2,2));
-		sim.getEvents().add(new Event(Event.EventType.move_bus,4,3));
-		sim.getEvents().add(new Event(Event.EventType.move_bus,0,4));
-		sim.getEvents().add(new Event(Event.EventType.move_bus,2,5));
 
+		System.out.println("Processing events!");
 		sim.processEvents(Simulator.ITERATIONS);
 	}
 }

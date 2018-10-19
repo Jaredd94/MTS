@@ -4,7 +4,7 @@ import java.io.*;
 
 public class Simulator {
 
-	private Integer simTime;
+	private int simTime;
 	private ArrayList<Event> events;
 	private ArrayList<Bus> buses;
 	private ArrayList<Passenger> passengers;
@@ -23,6 +23,7 @@ public class Simulator {
 		this.passengers = new ArrayList<Passenger>();
 		this.routes = new ArrayList<Route>();
 		this.stops = new ArrayList<Stop>();
+		this.depots = new ArrayList<Depot>();
 	}
 	
 	// Main constructor we will use
@@ -31,80 +32,142 @@ public class Simulator {
 			System.out.println("You need to input instructions for the simulator");
 		}
 		
-		for (String instruction : instructions) {
-			parser(instruction);
-		}
-		
-		this.simTime = 1;
+		this.simTime = 0;
 		this.events = new ArrayList<Event>();
 		this.buses = new ArrayList<Bus>();
 		this.passengers = new ArrayList<Passenger>();
 		this.routes = new ArrayList<Route>();
 		this.stops = new ArrayList<Stop>();
+		this.depots = new ArrayList<Depot>();
+		
+		for (String instruction : instructions) {
+			parser(instruction);
+		}
 	}
 	
 	// Parse command and handle with proper call
 	public void parser(String line) {
-		String[] cmd_opts = line.split(",");
+		String[] cmdArgs = line.split(",");
 		
-		String action = cmd_opts[0];
+		String action = cmdArgs[0];
+		
+		System.out.printf("Processing %s with length %d\n", line, cmdArgs.length);
 		
 		switch (action) {
 			case "add_bus":
+				addBus(cmdArgs);
+				break;
 			case "add_depot":
+				addDepot(cmdArgs);
+				break;
 			case "add_event":
+				addEvent(cmdArgs);
+				break;
 			case "add_route":
+				addRoute(cmdArgs);
+				break;
 			case "add_stop":
+				addStop(cmdArgs);
+				break;
 			case "extend_route":
+				extendRoute(cmdArgs);
+				break;
+			default:
+				System.out.printf("%s is not an available command", action);
+				break;
 		}
 	}
 	
 	public void addBus(String[] args) {
-		Integer id 				= Integer.parseInt(args[0]);
-		Route route 				= findRouteByNumber(Integer.parseInt(args[1]));
-		Double latitude 			= Double.parseDouble(args[2]);
-		Double longitude 		= Double.parseDouble(args[3]);
-		Integer passengerCount 	= Integer.parseInt(args[4]);
-		Integer maxCapacity 		= Integer.parseInt(args[5]);
-		Integer fuelLevel 		= Integer.parseInt(args[6]);
-		Integer speed 			= Integer.parseInt(args[7]);
+		if (args.length != 9) {
+			System.out.printf("Incorrect number of args passed to cmd: %s\n", args[0]);
+			return;
+		}
 		
-		// TODO
-		// Need to find the correct route index in route
-		// Need to create the bus object
+		int id 				= Integer.parseInt(args[1]);
+		Route route 			= getRouteById(Integer.parseInt(args[2]));
+		int routeIndex		= Integer.parseInt(args[3]);
+		int passengerCount 	= Integer.parseInt(args[4]);
+		int maxCapacity 		= Integer.parseInt(args[5]);
+		int fuelLevel 		= Integer.parseInt(args[6]);
+		int fuelCapacity 	= Integer.parseInt(args[7]);
+		int speed 			= Integer.parseInt(args[8]);
+		
+		Bus bus = new Bus(id, route, routeIndex, passengerCount, maxCapacity, fuelLevel, fuelCapacity, speed);
+		buses.add(bus);
 	}
 	
 	public void addDepot(String[] args) {
-		Integer id		= Integer.parseInt(args[0]);
-		String name		= args[1];
-		Double latitude 	= Double.parseDouble(args[2]);
-		Double longitude	= Double.parseDouble(args[3]);
+		if (args.length != 5) {
+			System.out.printf("Incorrect number of args passed to cmd: %s", args[0]).println();
+			return;
+		}
+		int id			= Integer.parseInt(args[1]);
+		String name		= args[2];
+		double latitude 	= Double.parseDouble(args[3]);
+		double longitude	= Double.parseDouble(args[4]);
 		
 		Depot depot = new Depot(id, name, latitude, longitude);
 		depots.add(depot);
 	}
 	
 	public void addEvent(String[] args) {
-		Integer time 	= Integer.parseInt(args[0]);
-		String event		= args[1];
-		Integer id 		= Integer.parseInt(args[2]);
+		if (args.length != 4) {
+			System.out.printf("Incorrect number of args passed to cmd: %s", args[0]).println();
+			return;
+		}
+		int time = Integer.parseInt(args[1]);
+		Event.EventType type	= Event.EventType.valueOf(args[2]);
+		String[] eventArgs 	= new String[args.length - 3];
+		for(int i = 3; i < args.length; i++) {
+			eventArgs[i-3] = args[i];
+		}
+		Event event = new Event(time, type, eventArgs);
+		events.add(event);
 	}
 	
 	public void addRoute(String[] args) {
-		Integer id 		= Integer.parseInt(args[0]);
-		Integer number	= Integer.parseInt(args[1]);
-		String name 		= args[2];
+		if (args.length != 4) {
+			System.out.printf("Incorrect number of args passed to cmd: %s", args[0]).println();
+			return;
+		}
+		int id 		= Integer.parseInt(args[1]);
+		int number	= Integer.parseInt(args[2]);
+		String name 	= args[3];
 		
 		Route route = new Route(id, number, name);
 		routes.add(route);
 	}
 	
 	public void addStop(String[] args) {
-		// add_stop id name rider_count latitude longitude
+		if (args.length != 6) {
+			System.out.printf("Incorrect number of args passed to cmd: %s", args[0]).println();
+			return;
+		}
+		int id 		= Integer.parseInt(args[1]);
+		String name 		= args[2];
+		int riders 	= Integer.parseInt(args[3]);
+		double latitude	= Double.parseDouble(args[4]);
+		double longitude	= Double.parseDouble(args[5]);
+		
+		Stop stop = new Stop(id, name, riders, latitude, longitude);
+		stops.add(stop);
 	}
 	
 	public void extendRoute(String[] args) {
-		// extend_route route_id stop_id
+		if (args.length != 3) {
+			System.out.printf("Incorrect number of args passed to cmd: %s", args[0]).println();
+			return;
+		}
+		int routeId	= Integer.parseInt(args[1]);
+		int stopId	= Integer.parseInt(args[2]);
+		
+		Route route = getRouteById(routeId);
+		Stop stop = getStopById(stopId);
+		
+		if (route != null && stop != null) {
+			route.addStop(stop);
+		}
 	}
 	
 	public void processEvents(Integer timeLimit) {
@@ -116,17 +179,41 @@ public class Simulator {
 			
 			// Choose new event
 			Event event = events.remove(0);
+			String type = event.getType().toString();
+			int time = event.getTime();
 			
 			// Execute event
-			System.out.println(event.getType() + " at time " + event.getTime());
-			
-			// Add new event to queue if needed
-			
+			System.out.printf("Event %s at time %d", type, time).println();
+			invokeEvent(event);
+						
 			// increment simTime
 			simTime++;
 		}
 		System.out.println("Finishing event loop");
 	}
+	
+	public void invokeEvent(Event event) {
+		String type = event.getType().toString();
+		switch (type) {
+			case "move_bus":
+				int busId = Integer.parseInt(event.getArgs()[0]);
+				Bus bus = getBusById(busId);
+				if (bus != null) {
+					bus.moveBus();
+				}
+				// get buses new location
+				int time = bus.getArrivalTime();
+				
+				Event newEvent = new Event(time, event.getType(), event.getArgs());
+				events.add(newEvent);
+				break;
+			default: 
+				System.out.printf("%s is not a valid event", type).println();
+				break;
+		}
+				
+	}
+	
 	public Integer getSimTime() {
 		return simTime;
 	}
@@ -179,19 +266,67 @@ public class Simulator {
 		return ITERATIONS;
 	}
 	
-	// TODO
-	public Route findRouteByNumber(Integer name) {
-		if (getRoutes().isEmpty()) {
+	public Route getRouteByNumber(Integer number) {
+		if (routes.isEmpty()) {
 			System.out.println("No routes defined.  You need to add routes!");
 			return null;
 		}
 		
-		for (Route route: getRoutes()) {
-			if (route.getNumber().equals(name)) {
+		for (Route route: routes) {
+			if (route.getNumber() == number) {
 				return route;
 			}
 		}
 		
+		System.out.printf("No routes found with number %d", number).println();
+		return null;
+	}
+	
+	public Route getRouteById(Integer id) {
+		if (routes.isEmpty()) {
+			System.out.println("No routes defined.  You need to add routes!");
+			return null;
+		}
+		
+		for (Route route: routes) {
+			if (route.getId() == id) {
+				return route;
+			}
+		}
+		
+		System.out.printf("No routes found with id %d", id);
+		return null;
+	}
+	
+	public Stop getStopById(Integer id) {
+		if (stops.isEmpty()) {
+			System.out.println("No stops defined.  You need to add stops!");
+			return null;
+		}
+		
+		for (Stop stop: stops) {
+			if (stop.getId() == id) {
+				return stop;
+			}
+		}
+		
+		System.out.printf("No stops found with id %d", id).println();
+		return null;
+	}
+	
+	public Bus getBusById(Integer id) {
+		if (buses.isEmpty()) {
+			System.out.println("No buses defined.  You need to add buses!");
+			return null;
+		}
+		
+		for(Bus bus: buses) {
+			if (bus.getId() == id) {
+				return bus;
+			}
+		}
+		
+		System.out.printf("No buses found with id %d", id).println();
 		return null;
 	}
 }
