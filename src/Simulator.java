@@ -26,7 +26,6 @@ public class Simulator {
 		this.depots = new ArrayList<Depot>();
 	}
 	
-	// Main constructor we will use
 	public Simulator(ArrayList<String> instructions) {
 		if (instructions.isEmpty()) {
 			Debug.print("You need to input instructions for the simulator");
@@ -41,12 +40,11 @@ public class Simulator {
 		this.depots = new ArrayList<Depot>();
 		
 		for (String instruction : instructions) {
-			parserInstruction(instruction);
+			parseInstruction(instruction);
 		}
 	}
 	
-	// Parse command and handle with proper call
-	public void parserInstruction(String line) {
+	public void parseInstruction(String line) {
 		String[] cmdArgs = line.split(",");
 		
 		String action = cmdArgs[0];
@@ -76,6 +74,19 @@ public class Simulator {
 				System.out.printf("%s is not an available command", action);
 				break;
 		}
+	}
+	
+	public void handleEvent(Event event) {
+		String type = event.getType().toString();
+		switch (type) {
+			case "move_bus":
+				moveBus(event);
+				break;
+			default: 
+				System.out.printf("%s is not a valid event", type).println();
+				break;
+		}
+				
 	}
 	
 	public void addBus(String[] args) {
@@ -197,7 +208,7 @@ public class Simulator {
 				String type = event.getType().toString();
 				int time = event.getTime();
 				// Execute event
-				invokeEvent(event);
+				handleEvent(event);
 				iterations++;
 			}
 			
@@ -205,19 +216,6 @@ public class Simulator {
 			simTime++;
 		}
 		Debug.print("Finishing event loop");
-	}
-	
-	public void invokeEvent(Event event) {
-		String type = event.getType().toString();
-		switch (type) {
-			case "move_bus":
-				moveBus(event);
-				break;
-			default: 
-				System.out.printf("%s is not a valid event", type).println();
-				break;
-		}
-				
 	}
 	
 	public Integer getSimTime() {
