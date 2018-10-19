@@ -2,8 +2,8 @@ import java.util.ArrayList;
 
 public class Route {
 	
-	private Integer id;
-	private Integer number;
+	private int id;
+	private int number;
 	private String name;
 	private ArrayList<Stop> stops;
 
@@ -11,14 +11,14 @@ public class Route {
 		
 	}
 	
-	public Route(Integer id, Integer number, String name) {
+	public Route(int id, int number, String name) {
 		this.id = id;
 		this.number = number;
 		this.name = name;
 		this.stops = new ArrayList<Stop>();
 	}
 
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
 
@@ -26,7 +26,7 @@ public class Route {
 		this.id = id;
 	}
 
-	public Integer getNumber() {
+	public int getNumber() {
 		return number;
 	}
 
