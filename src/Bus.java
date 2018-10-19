@@ -160,7 +160,6 @@ public class Bus {
 		Debug.print("Is anyone getting on?");
 	}
 	
-	// TODO
 	public void moveBus(int currTime) {
 		Debug.print("Departing current stop!");
 		this.routeIndex = (this.routeIndex + 1) % this.route.stopList().size();

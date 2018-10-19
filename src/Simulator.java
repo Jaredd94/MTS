@@ -17,7 +17,7 @@ public class Simulator {
 	
 	// This constructor is for testing purposes
 	public Simulator() {
-		this.simTime = 1;
+		this.simTime = 0;
 		this.events = new ArrayList<Event>();
 		this.buses = new ArrayList<Bus>();
 		this.passengers = new ArrayList<Passenger>();
@@ -84,14 +84,14 @@ public class Simulator {
 			return;
 		}
 		
-		int id 				= Integer.parseInt(args[1]);
-		Route route 			= getRouteById(Integer.parseInt(args[2]));
-		int routeIndex		= Integer.parseInt(args[3]);
-		int passengerCount 	= Integer.parseInt(args[4]);
-		int maxCapacity 		= Integer.parseInt(args[5]);
-		int fuelLevel 		= Integer.parseInt(args[6]);
-		int fuelCapacity 	= Integer.parseInt(args[7]);
-		int speed 			= Integer.parseInt(args[8]);
+		int id = Integer.parseInt(args[1]);
+		Route route = getRouteById(Integer.parseInt(args[2]));
+		int routeIndex = Integer.parseInt(args[3]);
+		int passengerCount = Integer.parseInt(args[4]);
+		int maxCapacity = Integer.parseInt(args[5]);
+		int fuelLevel = Integer.parseInt(args[6]);
+		int fuelCapacity = Integer.parseInt(args[7]);
+		int speed = Integer.parseInt(args[8]);
 		
 		Bus bus = new Bus(id, route, routeIndex, passengerCount, maxCapacity, fuelLevel, fuelCapacity, speed);
 		buses.add(bus);
@@ -102,10 +102,10 @@ public class Simulator {
 			System.out.printf("Incorrect number of args passed to cmd: %s", args[0]).println();
 			return;
 		}
-		int id			= Integer.parseInt(args[1]);
-		String name		= args[2];
-		double latitude 	= Double.parseDouble(args[3]);
-		double longitude	= Double.parseDouble(args[4]);
+		int id = Integer.parseInt(args[1]);
+		String name = args[2];
+		double latitude = Double.parseDouble(args[3]);
+		double longitude = Double.parseDouble(args[4]);
 		
 		Depot depot = new Depot(id, name, latitude, longitude);
 		depots.add(depot);
@@ -131,9 +131,9 @@ public class Simulator {
 			System.out.printf("Incorrect number of args passed to cmd: %s", args[0]).println();
 			return;
 		}
-		int id 		= Integer.parseInt(args[1]);
-		int number	= Integer.parseInt(args[2]);
-		String name 	= args[3];
+		int id = Integer.parseInt(args[1]);
+		int number = Integer.parseInt(args[2]);
+		String name = args[3];
 		
 		Route route = new Route(id, number, name);
 		routes.add(route);
@@ -144,11 +144,11 @@ public class Simulator {
 			System.out.printf("Incorrect number of args passed to cmd: %s", args[0]).println();
 			return;
 		}
-		int id 		= Integer.parseInt(args[1]);
-		String name 		= args[2];
-		int riders 	= Integer.parseInt(args[3]);
-		double latitude	= Double.parseDouble(args[4]);
-		double longitude	= Double.parseDouble(args[5]);
+		int id = Integer.parseInt(args[1]);
+		String name = args[2];
+		int riders = Integer.parseInt(args[3]);
+		double latitude = Double.parseDouble(args[4]);
+		double longitude = Double.parseDouble(args[5]);
 		
 		Stop stop = new Stop(id, name, riders, latitude, longitude);
 		stops.add(stop);
@@ -159,8 +159,8 @@ public class Simulator {
 			System.out.printf("Incorrect number of args passed to cmd: %s", args[0]).println();
 			return;
 		}
-		int routeId	= Integer.parseInt(args[1]);
-		int stopId	= Integer.parseInt(args[2]);
+		int routeId = Integer.parseInt(args[1]);
+		int stopId = Integer.parseInt(args[2]);
 		
 		Route route = getRouteById(routeId);
 		Stop stop = getStopById(stopId);
@@ -171,8 +171,8 @@ public class Simulator {
 	}
 	
 	public void moveBus(Event event) {
-		int busId	= Integer.parseInt(event.getArgs()[0]);
-		Bus bus		= getBusById(busId);
+		int busId = Integer.parseInt(event.getArgs()[0]);
+		Bus bus = getBusById(busId);
 		if (bus == null) {
 			System.out.printf("Unable to find bus with id %d", busId);
 			return;
