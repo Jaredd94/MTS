@@ -29,7 +29,7 @@ public class Simulator {
 	// Main constructor we will use
 	public Simulator(ArrayList<String> instructions) {
 		if (instructions.isEmpty()) {
-			System.out.println("You need to input instructions for the simulator");
+			Debug.print("You need to input instructions for the simulator");
 		}
 		
 		this.simTime = 0;
@@ -51,7 +51,7 @@ public class Simulator {
 		
 		String action = cmdArgs[0];
 		
-		System.out.printf("Processing %s with length %d\n", line, cmdArgs.length);
+		Debug.print("Processing " + line + " with args length " + cmdArgs.length);
 		
 		switch (action) {
 			case "add_bus":
@@ -170,8 +170,20 @@ public class Simulator {
 		}
 	}
 	
+	public void moveBus(Event event) {
+		int busId	= Integer.parseInt(event.getArgs()[0]);
+		Bus bus		= getBusById(busId);
+		if (bus == null) {
+			System.out.printf("Unable to find bus with id %d", busId);
+			return;
+		}
+		bus.moveBus();
+		Event newEvent = new Event(bus.getArrivalTime(), event.getType(), event.getArgs());
+		events.add(newEvent);
+	}
+	
 	public void processEvents(Integer timeLimit) {
-		System.out.println("Starting event loop");
+		Debug.print("Starting event loop");
 		while(simTime < timeLimit && !events.isEmpty()) {
 			
 			// sort the event queue
@@ -189,23 +201,14 @@ public class Simulator {
 			// increment simTime
 			simTime++;
 		}
-		System.out.println("Finishing event loop");
+		Debug.print("Finishing event loop");
 	}
 	
 	public void invokeEvent(Event event) {
 		String type = event.getType().toString();
 		switch (type) {
 			case "move_bus":
-				int busId = Integer.parseInt(event.getArgs()[0]);
-				Bus bus = getBusById(busId);
-				if (bus != null) {
-					bus.moveBus();
-				}
-				// get buses new location
-				int time = bus.getArrivalTime();
-				
-				Event newEvent = new Event(time, event.getType(), event.getArgs());
-				events.add(newEvent);
+				moveBus(event);
 				break;
 			default: 
 				System.out.printf("%s is not a valid event", type).println();

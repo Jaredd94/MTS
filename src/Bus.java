@@ -135,16 +135,16 @@ public class Bus {
 	
 	// TODO
 	public void broadcastExit() {
-		System.out.println("Is anyone getting off?");
+		Debug.print("Is anyone getting off?");
 	}
 	
 	// TODO
 	public void broadcastBoarding() {
-		System.out.println("Is anyone getting on?");
+		Debug.print("Is anyone getting on?");
 	}
 	
 	// TODO
 	public void moveBus() {
-		System.out.println("Departing current stop!");
+		Debug.print("Departing current stop!");
 	}
 }

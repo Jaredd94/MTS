@@ -8,9 +8,9 @@ public class Parser {
 	@SuppressWarnings({ "resource"})
 	public static void main (String[] args) throws IOException {
 		
-		System.out.println("Start Simulator!");
+		Debug.print("Start Simulator!");
 		File inputFile = new File(args[0]);
-		System.out.println("Found File: " + inputFile.getAbsolutePath());
+		Debug.print("Found File: " + inputFile.getAbsolutePath());
 
 		BufferedReader br = new BufferedReader(new FileReader(inputFile));
 		
@@ -25,7 +25,7 @@ public class Parser {
 		
 		Simulator sim = new Simulator(instructions);
 
-		System.out.println("Processing events!");
+		Debug.print("Processing events!");
 		sim.processEvents(Simulator.ITERATIONS);
 	}
 }
