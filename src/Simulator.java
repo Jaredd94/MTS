@@ -191,7 +191,14 @@ public class Simulator {
 		bus.moveBus(event.getTime());
 		Event newEvent = new Event(bus.getArrivalTime(), event.getType(), event.getArgs());
 		events.add(newEvent);
-		System.out.println("Bus ID: "+ busId + " CurrTime: " + event.getTime() + " NextEvent Time: "+ newEvent.getTime());
+		int stopId = bus.getCurrStop().getId();
+		int time = bus.getArrivalTime();
+		
+		// Not needed for this part of the project yet (classes not yet implemented)
+		int passengerCount = bus.getPassengerCount();
+		int fuelLevel = bus.getFuelLevel();
+		
+		System.out.printf("b:%d->s:%d@%d//p:%d/f:%d", busId, stopId, time, 0, 0).println();
 	}
 	
 	public void processEvents(Integer loopLimit) {
