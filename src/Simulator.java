@@ -1,6 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.io.*;
 
 public class Simulator {
 
@@ -10,7 +8,6 @@ public class Simulator {
 	private ArrayList<Passenger> passengers;
 	private ArrayList<Route> routes;
 	private ArrayList<Depot> depots;
-
 	private ArrayList<Stop> stops;
 	
 	public static final int ITERATIONS = 20;
@@ -27,10 +24,6 @@ public class Simulator {
 	}
 	
 	public Simulator(ArrayList<String> instructions) {
-		if (instructions.isEmpty()) {
-			Debug.print("You need to input instructions for the simulator");
-		}
-		
 		this.simTime = 0;
 		this.events = new ArrayList<Event>();
 		this.buses = new ArrayList<Bus>();
@@ -39,54 +32,139 @@ public class Simulator {
 		this.stops = new ArrayList<Stop>();
 		this.depots = new ArrayList<Depot>();
 		
+		if (instructions.isEmpty()) {
+			Debug.print("You need to input instructions for the simulator");
+		}
+		
 		for (String instruction : instructions) {
 			parseInstruction(instruction);
 		}
 	}
 	
-	public void parseInstruction(String line) {
-		String[] cmdArgs = line.split(",");
-		
-		String action = cmdArgs[0];
-		
-		Debug.print("Processing " + line + " with args length " + cmdArgs.length);
-		
-		switch (action) {
-			case "add_bus":
-				addBus(cmdArgs);
-				break;
-			case "add_depot":
-				addDepot(cmdArgs);
-				break;
-			case "add_event":
-				addEvent(cmdArgs);
-				break;
-			case "add_route":
-				addRoute(cmdArgs);
-				break;
-			case "add_stop":
-				addStop(cmdArgs);
-				break;
-			case "extend_route":
-				extendRoute(cmdArgs);
-				break;
-			default:
-				System.out.printf("%s is not an available command", action);
-				break;
-		}
+	public Integer getSimTime() {
+		return simTime;
+	}
+
+	public void setSimTime(Integer simTime) {
+		this.simTime = simTime;
+	}
+
+	public ArrayList<Event> getEvents() {
+		return events;
+	}
+
+	public void setEvents(ArrayList<Event> events) {
+		this.events = events;
+	}
+
+	public ArrayList<Bus> getBuses() {
+		return buses;
+	}
+
+	public void setBuses(ArrayList<Bus> buses) {
+		this.buses = buses;
+	}
+
+	public ArrayList<Passenger> getPassengers() {
+		return passengers;
+	}
+
+	public void setPassengers(ArrayList<Passenger> passengers) {
+		this.passengers = passengers;
+	}
+
+	public ArrayList<Route> getRoutes() {
+		return routes;
+	}
+
+	public void setRoutes(ArrayList<Route> routes) {
+		this.routes = routes;
+	}
+
+	public ArrayList<Stop> getStops() {
+		return stops;
+	}
+
+	public void setStops(ArrayList<Stop> stops) {
+		this.stops = stops;
+	}
+
+	public static int getIterations() {
+		return ITERATIONS;
 	}
 	
-	public void handleEvent(Event event) {
-		String type = event.getType().toString();
-		switch (type) {
-			case "move_bus":
-				moveBus(event);
-				break;
-			default: 
-				System.out.printf("%s is not a valid event", type).println();
-				break;
+	public Route getRouteByNumber(Integer number) {
+		if (routes.isEmpty()) {
+			Debug.print("No routes defined.  You need to add routes!");
+			return null;
 		}
-				
+		
+		for (Route route: routes) {
+			if (route.getNumber() == number) {
+				return route;
+			}
+		}
+		
+		System.out.printf("No routes found with number %d", number).println();
+		return null;
+	}
+	
+	public Route getRouteById(Integer id) {
+		if (routes.isEmpty()) {
+			Debug.print("No routes defined.  You need to add routes!");
+			return null;
+		}
+		
+		for (Route route: routes) {
+			if (route.getId() == id) {
+				return route;
+			}
+		}
+		
+		System.out.printf("No routes found with id %d", id);
+		return null;
+	}
+	
+	public Stop getStopById(Integer id) {
+		if (stops.isEmpty()) {
+			Debug.print("No stops defined.  You need to add stops!");
+			return null;
+		}
+		
+		for (Stop stop: stops) {
+			if (stop.getId() == id) {
+				return stop;
+			}
+		}
+		
+		System.out.printf("No stops found with id %d", id).println();
+		return null;
+	}
+	
+	public Bus getBusById(Integer id) {
+		if (buses.isEmpty()) {
+			Debug.print("No buses defined.  You need to add buses!");
+			return null;
+		}
+		
+		for(Bus bus: buses) {
+			if (bus.getId() == id) {
+				return bus;
+			}
+		}
+		
+		System.out.printf("No buses found with id %d", id).println();
+		return null;
+	}
+	
+	public ArrayList<Event> getEventsByTime(int time) {
+		ArrayList<Event> temp = new ArrayList<Event>();
+		for (Event event : events) {
+			if (event.getTime() == time) {
+				temp.add(event);
+			}
+		}
+		return temp;
 	}
 	
 	public void addBus(String[] args) {
@@ -182,23 +260,60 @@ public class Simulator {
 	}
 	
 	public void moveBus(Event event) {
+		
+		// Check if args is valid
 		int busId = Integer.parseInt(event.getArgs()[0]);
 		Bus bus = getBusById(busId);
 		if (bus == null) {
 			System.out.printf("Unable to find bus with id %d", busId);
 			return;
 		}
-		bus.moveBus(event.getTime());
-		Event newEvent = new Event(bus.getArrivalTime(), event.getType(), event.getArgs());
+		
+		// Move the bus
+		bus.moveBus();
+		
+		// Add next move_bus event for bus
+		Event newEvent = new Event(bus.getArrivalTime(), Event.EventType.move_bus, event.getArgs());
 		events.add(newEvent);
+		
+		// Initialize print vars
 		int stopId = bus.getCurrStop().getId();
 		int time = bus.getArrivalTime();
 		
-		// Not needed for this part of the project yet (classes not yet implemented)
+		/* Not yet implemented into project design
 		int passengerCount = bus.getPassengerCount();
-		int fuelLevel = bus.getFuelLevel();
+		int fuelLevel = bus.getFuelLevel(); */
 		
 		System.out.printf("b:%d->s:%d@%d//p:%d/f:%d", busId, stopId, time, 0, 0).println();
+	}
+	
+	public void parseInstruction(String line) {
+		String[] cmdArgs = line.split(",");
+		String action = cmdArgs[0];
+		Debug.print("Processing " + line + " with args length " + cmdArgs.length);
+		switch (action) {
+			case "add_bus":
+				addBus(cmdArgs);
+				break;
+			case "add_depot":
+				addDepot(cmdArgs);
+				break;
+			case "add_event":
+				addEvent(cmdArgs);
+				break;
+			case "add_route":
+				addRoute(cmdArgs);
+				break;
+			case "add_stop":
+				addStop(cmdArgs);
+				break;
+			case "extend_route":
+				extendRoute(cmdArgs);
+				break;
+			default:
+				System.out.printf("%s is not an available command", action);
+				break;
+		}
 	}
 	
 	public void processEvents(Integer loopLimit) {
@@ -206,148 +321,41 @@ public class Simulator {
 		int iterations = 0;
 		while(iterations < loopLimit || events.isEmpty()) {
 			
-			// sort the event queue
+			// Sort the event queue
 			events.sort(new SortEvents());
 			
-			// Choose new event
+			// Handle all events at the current time
 			ArrayList<Event> eventsAtTime = getEventsByTime(simTime);
-			for (Event event : eventsAtTime) {
-				String type = event.getType().toString();
-				int time = event.getTime();
-				// Execute event
+			for (Event event : eventsAtTime) {				
 				handleEvent(event);
 				iterations++;
+				if (iterations >= loopLimit) {
+					break;
+				}
 			}
 			
-			// increment simTime
 			simTime++;
+			
+			broadcastTime();
 		}
 		Debug.print("Finishing event loop");
 	}
 	
-	public Integer getSimTime() {
-		return simTime;
-	}
-
-	public void setSimTime(Integer simTime) {
-		this.simTime = simTime;
-	}
-
-	public ArrayList<Event> getEvents() {
-		return events;
-	}
-
-	public void setEvents(ArrayList<Event> events) {
-		this.events = events;
-	}
-
-	public ArrayList<Bus> getBuses() {
-		return buses;
-	}
-
-	public void setBuses(ArrayList<Bus> buses) {
-		this.buses = buses;
-	}
-
-	public ArrayList<Passenger> getPassengers() {
-		return passengers;
-	}
-
-	public void setPassengers(ArrayList<Passenger> passengers) {
-		this.passengers = passengers;
-	}
-
-	public ArrayList<Route> getRoutes() {
-		return routes;
-	}
-
-	public void setRoutes(ArrayList<Route> routes) {
-		this.routes = routes;
-	}
-
-	public ArrayList<Stop> getStops() {
-		return stops;
-	}
-
-	public void setStops(ArrayList<Stop> stops) {
-		this.stops = stops;
-	}
-
-	public static int getIterations() {
-		return ITERATIONS;
+	public void handleEvent(Event event) {
+		String type = event.getType().toString();
+		switch (type) {
+			case "move_bus":
+				moveBus(event);
+				break;
+			default: 
+				System.out.printf("%s is not a valid event", type).println();
+				break;
+		}		
 	}
 	
-	public Route getRouteByNumber(Integer number) {
-		if (routes.isEmpty()) {
-			System.out.println("No routes defined.  You need to add routes!");
-			return null;
+	public void broadcastTime() {
+		for (Bus bus: buses) {
+			bus.setCurrentTime(getSimTime());
 		}
-		
-		for (Route route: routes) {
-			if (route.getNumber() == number) {
-				return route;
-			}
-		}
-		
-		System.out.printf("No routes found with number %d", number).println();
-		return null;
-	}
-	
-	public Route getRouteById(Integer id) {
-		if (routes.isEmpty()) {
-			System.out.println("No routes defined.  You need to add routes!");
-			return null;
-		}
-		
-		for (Route route: routes) {
-			if (route.getId() == id) {
-				return route;
-			}
-		}
-		
-		System.out.printf("No routes found with id %d", id);
-		return null;
-	}
-	
-	public Stop getStopById(Integer id) {
-		if (stops.isEmpty()) {
-			System.out.println("No stops defined.  You need to add stops!");
-			return null;
-		}
-		
-		for (Stop stop: stops) {
-			if (stop.getId() == id) {
-				return stop;
-			}
-		}
-		
-		System.out.printf("No stops found with id %d", id).println();
-		return null;
-	}
-	
-	public Bus getBusById(Integer id) {
-		if (buses.isEmpty()) {
-			System.out.println("No buses defined.  You need to add buses!");
-			return null;
-		}
-		
-		for(Bus bus: buses) {
-			if (bus.getId() == id) {
-				return bus;
-			}
-		}
-		
-		System.out.printf("No buses found with id %d", id).println();
-		return null;
-	}
-	
-	public ArrayList<Event> getEventsByTime(int time) {
-		ArrayList<Event> temp = new ArrayList<Event>();
-		for (Event event : events) {
-			if (event.getTime() == time) {
-				temp.add(event);
-			}
-		}
-		return temp;
 	}
 }

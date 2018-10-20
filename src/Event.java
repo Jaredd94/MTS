@@ -1,12 +1,13 @@
 
 public class Event {
+	
 	enum EventType {
 		move_bus;
 	}
 	
-	EventType type;
-	int time;
-	String[] args;
+	private int time;
+	private EventType type;
+	private String[] args;
 
 	public Event(int time, EventType type, String[] args) {
 		this.time = time;
@@ -14,14 +15,13 @@ public class Event {
 		this.args = args;
 	}
 	
-	public String[] getArgs() {
-		return args;
+	public int getTime() {
+		return time;
 	}
 
-	public void setArgs(String[] args) {
-		this.args = args;
+	public void setTime(Integer time) {
+		this.time = time;
 	}
-
 	public EventType getType() {
 		return type;
 	}
@@ -29,12 +29,11 @@ public class Event {
 	public void setType(EventType type) {
 		this.type = type;
 	}
-
-	public int getTime() {
-		return time;
+	public String[] getArgs() {
+		return args;
 	}
 
-	public void setTime(Integer time) {
-		this.time = time;
+	public void setArgs(String[] args) {
+		this.args = args;
 	}
 }
