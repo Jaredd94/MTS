@@ -4,7 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Parser {
+public class Main {
 	@SuppressWarnings({ "resource"})
 	public static void main (String[] args) throws IOException {
 		Debug.on = false;

@@ -261,7 +261,7 @@ public class Simulator {
 	
 	public void moveBus(Event event) {
 		
-		// Check if args is valid
+		// Check if args are valid
 		int busId = Integer.parseInt(event.getArgs()[0]);
 		Bus bus = getBusById(busId);
 		if (bus == null) {
