@@ -1,16 +1,24 @@
 import java.util.ArrayList;
 
-public class Simulator {
+public class Simulator implements Cloneable{
 
 	private int simTime;
+	private ArrayList<Event> adjustments;
 	private ArrayList<Event> events;
 	private ArrayList<Bus> buses;
 	private ArrayList<Passenger> passengers;
 	private ArrayList<Route> routes;
 	private ArrayList<Depot> depots;
 	private ArrayList<Stop> stops;
+	private ArrayList<Simulator> pastStates;
 	
 	public static final int ITERATIONS = 20;
+	
+	public final double SPEED = 1.0;
+	public final double WAITING = 1.0;
+	public final double CAPACITY = 1.0;
+	public final double COMBINED = 1.0;
+	public final double BUSES = 1.0;
 	
 	// This constructor is for testing purposes
 	public Simulator() {
@@ -21,6 +29,8 @@ public class Simulator {
 		this.routes = new ArrayList<Route>();
 		this.stops = new ArrayList<Stop>();
 		this.depots = new ArrayList<Depot>();
+		this.adjustments = new ArrayList<Event>();
+		this.pastStates = new ArrayList<Simulator>();
 	}
 	
 	public Simulator(ArrayList<String> instructions) {
@@ -31,6 +41,8 @@ public class Simulator {
 		this.routes = new ArrayList<Route>();
 		this.stops = new ArrayList<Stop>();
 		this.depots = new ArrayList<Depot>();
+		this.adjustments = new ArrayList<Event>();
+		this.pastStates = new ArrayList<Simulator>();
 		
 		if (instructions.isEmpty()) {
 			Debug.print("You need to input instructions for the simulator");
@@ -167,6 +179,16 @@ public class Simulator {
 		return temp;
 	}
 	
+	public ArrayList<Event> getAdjustmentsForBus(int id) {
+		ArrayList<Event> temp = new ArrayList<Event>();
+		for (Event event : adjustments) {
+			if (Integer.parseInt(event.getArgs()[0]) == id) {
+				temp.add(event);
+			}
+		}
+		return temp;
+	}
+	
 	public void addBus(String[] args) {
 		if (args.length != 9) {
 			System.out.printf("Incorrect number of args passed to cmd: %s\n", args[0]);
@@ -259,9 +281,8 @@ public class Simulator {
 		}
 	}
 	
-	public void moveBus(Event event) {
+	public void adjustPassengerCapacity(Event event) {
 		
-		// Check if args are valid
 		int busId = Integer.parseInt(event.getArgs()[0]);
 		Bus bus = getBusById(busId);
 		if (bus == null) {
@@ -269,24 +290,132 @@ public class Simulator {
 			return;
 		}
 		
-		// Move the bus
-		bus.moveBus();
-		
-		// Add next move_bus event for bus
-		Event newEvent = new Event(bus.getArrivalTime(), Event.EventType.move_bus, event.getArgs());
-		events.add(newEvent);
-		
-		// Initialize print vars
-		int stopId = bus.getCurrStop().getId();
-		int time = bus.getArrivalTime();
-		
-		/* Not yet implemented into project design
-		int passengerCount = bus.getPassengerCount();
-		int fuelLevel = bus.getFuelLevel(); */
-		
-		System.out.printf("b:%d->s:%d@%d//p:%d/f:%d", busId, stopId, time, 0, 0).println();
+		int newPassengerCapacity = Integer.parseInt(event.getArgs()[1]);
+		bus.setMaxCapacity(newPassengerCapacity);
 	}
 	
+	public void adjustBusSpeed(Event event) {
+		
+		int busId = Integer.parseInt(event.getArgs()[0]);
+		Bus bus = getBusById(busId);
+		if (bus == null) {
+			System.out.printf("Unable to find bus with id %d", busId);
+			return;
+		}
+		
+		int newBusSpeed = Integer.parseInt(event.getArgs()[1]);
+		bus.setMaxCapacity(newBusSpeed);
+	}
+	
+	public void adjustBusRoute(Event event) {
+		
+		int busId = Integer.parseInt(event.getArgs()[0]);
+		Bus bus = getBusById(busId);
+		if (bus == null) {
+			System.out.printf("Unable to find bus with id %d", busId);
+			return;
+		}
+		
+		Route route = getRouteById(Integer.parseInt(event.getArgs()[1]));
+		int routeIndex = Integer.parseInt(event.getArgs()[2]);
+		bus.setRoute(route);
+		bus.setRouteIndex(routeIndex%route.stopList().size());
+	}
+	
+	public void moveBus(Event event) {
+		
+		int busId = Integer.parseInt(event.getArgs()[0]);
+		Bus bus = getBusById(busId);
+		if (bus == null) {
+			System.out.printf("Unable to find bus with id %d", busId);
+			return;
+		}
+		
+		ArrayList<Event> changes = getAdjustmentsForBus(busId);
+		changes.sort(new SortEvents());
+		for (Event change : changes) {
+			handleEvent(change);
+		}
+		
+		// Initialize print vars
+		int stopId = bus.getNextStop().getId();
+		int time = bus.getArrivalTime();
+		
+		System.out.printf("b:%d->s:%d@%d//p:%d/f:%d", busId, stopId, time, 0, 0).println();
+		
+		// Add next move_bus event for bus
+		Event newEvent = new Event(time, Event.EventType.move_bus, event.getArgs());
+		events.add(newEvent);
+		
+		// Move the bus
+		bus.moveBus();
+	}
+	
+	public void broadcastTime() {
+		for (Bus bus: buses) {
+			bus.setCurrentTime(getSimTime());
+		}
+	}
+	
+	public void handleEvent(Event event) {
+		String type = event.getType().toString();
+		switch (type) {
+			case "move_bus":
+				moveBus(event);
+				break;
+			case "adjust_passenger_count":
+				adjustPassengerCapacity(event);
+				break;
+			case "adjust_bus_speed":
+				adjustBusSpeed(event);
+				break;
+			case "adjust_bus_route":
+				adjustBusRoute(event);
+				break;
+			default: 
+				System.out.printf("%s is not a valid event", type).println();
+				break;
+		}		
+	}
+	
+	public void processEvents(Integer loopLimit) throws CloneNotSupportedException {
+		Debug.print("Starting event loop");
+		int iterations = 0;
+		while(iterations < loopLimit && !events.isEmpty()) {
+			
+			// Sort the event queue
+			events.sort(new SortEvents());
+			
+			// Handle all events at the current time
+			ArrayList<Event> eventsAtTime = getEventsByTime(simTime);
+			for (Event event : eventsAtTime) {				
+				handleEvent(event);
+				iterations++;
+				
+				// save the current sim state
+				Simulator simState = clone();
+				saveState(simState);
+				
+				if (iterations >= loopLimit) {
+					break;
+				}
+			}
+			
+			simTime++;
+			
+			broadcastTime();
+		}
+		Debug.print("Finishing event loop");
+	}
+	
+	public ArrayList<Simulator> getPastStates() {
+		return pastStates;
+	}
+
+	public void setPastStates(ArrayList<Simulator> pastStates) {
+		this.pastStates = pastStates;
+	}
+
 	public void parseInstruction(String line) {
 		String[] cmdArgs = line.split(",");
 		String action = cmdArgs[0];
@@ -316,46 +445,45 @@ public class Simulator {
 		}
 	}
 	
-	public void processEvents(Integer loopLimit) {
-		Debug.print("Starting event loop");
-		int iterations = 0;
-		while(iterations < loopLimit || events.isEmpty()) {
-			
-			// Sort the event queue
-			events.sort(new SortEvents());
-			
-			// Handle all events at the current time
-			ArrayList<Event> eventsAtTime = getEventsByTime(simTime);
-			for (Event event : eventsAtTime) {				
-				handleEvent(event);
-				iterations++;
-				if (iterations >= loopLimit) {
-					break;
-				}
-			}
-			
-			simTime++;
-			
-			broadcastTime();
+	public double waitingPassengers() {
+		int totalWaitingPassengers = 0;
+		for (Stop stop : stops) {
+			totalWaitingPassengers += stop.getRidersWaitingCount();
 		}
-		Debug.print("Finishing event loop");
+		return totalWaitingPassengers;
 	}
 	
-	public void handleEvent(Event event) {
-		String type = event.getType().toString();
-		switch (type) {
-			case "move_bus":
-				moveBus(event);
-				break;
-			default: 
-				System.out.printf("%s is not a valid event", type).println();
-				break;
-		}		
+	public double busCost() {
+		double totalBusCost = 0;
+		for (Bus bus : buses) {
+			totalBusCost += ((this.SPEED * bus.getSpeed()) + (this.CAPACITY * bus.getMaxCapacity()));
+		}
+		return totalBusCost;
 	}
 	
-	public void broadcastTime() {
-		for (Bus bus: buses) {
-			bus.setCurrentTime(getSimTime());
+	public double systemEfficiency() {
+		return (this.WAITING * waitingPassengers()) + (this.BUSES * busCost()) + (this.COMBINED * waitingPassengers() * busCost());
+	}
+	
+	public Simulator clone() throws CloneNotSupportedException {
+		return (Simulator) super.clone();
+	}
+	
+	public void saveState(Simulator simState) {
+		if (pastStates.size() < 3) {
+			pastStates.add(simState);
+		} else {
+			pastStates.remove(0);
+			pastStates.add(simState);
+		}
+	}
+	
+	public void rewind (int pastState) throws InstantiationException, IllegalAccessException {
+		Runtime run = Runtime.getRuntime();
+		System.out.println(this);
+		if (pastState > 0 && pastState < 3) {
+			Simulator sim = pastStates.get(pastState-1);
+			System.out.println(sim);
 		}
 	}
 }

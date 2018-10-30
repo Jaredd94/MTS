@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class Main {
 	@SuppressWarnings({ "resource"})
-	public static void main (String[] args) throws IOException {
+	public static void main (String[] args) throws IOException, CloneNotSupportedException, InstantiationException, IllegalAccessException {
 		Debug.on = false;
 		Debug.print("Start Simulator!");
 		File inputFile = new File(args[0]);
@@ -22,5 +22,6 @@ public class Main {
 		Simulator sim = new Simulator(instructions);
 		Debug.print("Processing events!");
 		sim.processEvents(Simulator.ITERATIONS);
+		sim.rewind(2);
 	}
 }

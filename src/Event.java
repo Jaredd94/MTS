@@ -2,7 +2,7 @@
 public class Event {
 	
 	enum EventType {
-		move_bus;
+		move_bus, adjust_passenger_capacity, adjust_bus_speed, adjust_bus_route
 	}
 	
 	private int time;
